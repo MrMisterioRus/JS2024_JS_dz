@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weighted Graph Example</title>
+    <style>
+        ul {
+            list-style-type: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Weighted Graph Example</h1>
+    <div>
+        <label for="vertex">Add Vertex:</label>
+        <input type="text" id="vertex">
+        <button onclick="addVertex()">Add</button>
+    </div>
+    <div>
+        <label for="from">From:</label>
+        <input type="text" id="from">
+        <label for="to">To:</label>
+        <input type="text" id="to">
+        <label for="weight">Weight:</label>
+        <input type="text" id="weight">
+        <button onclick="addEdge()">Add Edge</button>
+    </div>
+    <div>
+        <label for="start">Start Vertex:</label>
+        <input type="text" id="start">
+        <label for="end">End Vertex:</label>
+        <input type="text" id="end">
+        <button onclick="findShortestPath()">Find Shortest Path</button>
+    </div>
+    <div>
+        <h2>Shortest Path:</h2>
+        <ul id="shortestPath"></ul>
+    </div>
+
+    <script>
+        // Определение класса WeightedGraph и PriorityQueue
+        class WeightedGraph {
+            constructor() {
+                this.adjacencyList = {};
+            }
+
+            addVertex(vertex) {
+                if (!this.adjacencyList[vertex]) {
+                    this.adjacencyList[vertex] = [];
+                }
+            }
+
+            addEdge(vertex1, vertex2, weight) {
+                this.adjacencyList[vertex1].push({ node: vertex2, weight });
+                this.adjacencyList[vertex2].push({ node: vertex1, weight });
+            }
+
+            removeEdge(vertex1, vertex2) {
+                this.adjacencyList[vertex1] = this.adjacencyList[vertex1].filter(
+                    edge => edge.node !== vertex2
+                );
+                this.adjacencyList[vertex2] = this.adjacencyList[vertex2].filter(
+                    edge => edge.node !== vertex1
+                );
+            }
+
+            removeVertex(vertex) {
+                while (this.adjacencyList[vertex].length) {
+                    const adjacentVertex = this.adjacencyList[vertex].pop().node;
+                    this.removeEdge(vertex, adjacentVertex);
+                }
+                delete this.adjacencyList[vertex];
+            }
+
+            shortestPath(start, end) {
+                const distances = {};
+                const visited = {};
+                const previous = {};
+                const priorityQueue = new PriorityQueue();
+
+                for (let vertex in this.adjacencyList) {
+                    if (vertex === start) {
+                        distances[vertex] = 0;
+                        priorityQueue.enqueue(vertex, 0);
+                    } else {
+                        distances[vertex] = Infinity;
+                        priorityQueue.enqueue(vertex, Infinity);
+                    }
+                    previous[vertex] = null;
+                }
+
+                while (!priorityQueue.isEmpty()) {
+                    const currentVertex = priorityQueue.dequeue().val;
+                    if (currentVertex === end) {
+                        const path = [];
+                        while (previous[currentVertex]) {
+                            path.push(currentVertex);
+                            currentVertex = previous[currentVertex];
+                        }
+                        path.push(start);
+                        return path.reverse();
+                    }
+                    if (currentVertex || distances[currentVertex] !== Infinity) {
+                        for (let neighbor of this.adjacencyList[currentVertex]) {
+                            const nextNode = neighbor.node;
+                            const candidate = distances[currentVertex] + neighbor.weight;
+                            if (candidate < distances[nextNode]) {
+                                distances[nextNode] = candidate;
+                                previous[nextNode] = currentVertex;
+                                priorityQueue.enqueue(nextNode, candidate);
+                            }
+                        }
+                    }
+                }
+            }
+
+            size() {
+                return Object.keys(this.adjacencyList).length;
+            }
+        }
+
+        class PriorityQueue {
+            constructor() {
+                this.values = [];
+            }
+
+            enqueue(val, priority) {
+                this.values.push({ val, priority });
+                this.sort();
+            }
+
+            dequeue() {
+                return this.values.shift();
+            }
+
+            sort() {
+                this.values.sort((a, b) => a.priority - b.priority);
+            }
+
+            isEmpty() {
+                return this.values.length === 0;
+            }
+        }
+
+        const graph = new WeightedGraph();
+
+        function addVertex() {
+            const vertex = document.getElementById('vertex').value;
+            if (vertex.trim() !== '') {
+                graph.addVertex(vertex);
+                document.getElementById('vertex').value = '';
+            }
+        }
+
+        function addEdge() {
+            const from = document.getElementById('from').value;
+            const to = document.getElementById('to').value;
+            const weight = parseInt(document.getElementById('weight').value);
+            if (from.trim() !== '' && to.trim() !== '' && !isNaN(weight)) {
+                graph.addEdge(from, to, weight);
+                document.getElementById('from').value = '';
+                document.getElementById('to').value = '';
+                document.getElementById('weight').value = '';
+            }
+        }
+
+        function findShortestPath() {
+            const start = document.getElementById('start').value;
+            const end = document.getElementById('end').value;
+            if (start.trim() !== '' && end.trim() !== '') {
+                const shortestPath = graph.shortestPath(start, end);
+                document.getElementById('shortestPath').innerHTML = shortestPath.map(v => `<li>${v}</li>`).join('');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doubly Linked List Example</title>
+</head>
+<body>
+    <h1>Doubly Linked List Example</h1>
+    <div>
+        <label for="data">Enter Data:</label>
+        <input type="text" id="data">
+        <button onclick="appendNode()">Append</button>
+        <button onclick="prependNode()">Prepend</button>
+        <button onclick="removeNode()">Remove</button>
+        <button onclick="findNode()">Find</button>
+        <button onclick="updateNode()">Update</button>
+        <button onclick="getSize()">Size</button>
+    </div>
+    <div>
+        <h2>Linked List Contents:</h2>
+        <ul id="listContents"></ul>
+    </div>
+
+    <script>
+
+        class Node {
+            constructor(data) {
+                this.data = data;
+                this.prev = null;
+                this.next = null;
+            }
+        }
+
+        class DoublyLinkedList {
+            constructor() {
+                this.head = null;
+                this.tail = null;
+                this.length = 0;
+            }
+
+            append(data) {
+                const newNode = new Node(data);
+                if (this.head === null) {
+                    this.head = newNode;
+                    this.tail = newNode;
+                } else {
+                    newNode.prev = this.tail;
+                    this.tail.next = newNode;
+                    this.tail = newNode;
+                }
+                this.length++;
+            }
+
+            prepend(data) {
+                const newNode = new Node(data);
+                if (this.head === null) {
+                    this.head = newNode;
+                    this.tail = newNode;
+                } else {
+                    newNode.next = this.head;
+                    this.head.prev = newNode;
+                    this.head = newNode;
+                }
+                this.length++;
+            }
+
+            remove(data) {
+                let currentNode = this.head;
+                while (currentNode) {
+                    if (currentNode.data === data) {
+                        if (currentNode === this.head && currentNode === this.tail) {
+                            this.head = null;
+                            this.tail = null;
+                        } else if (currentNode === this.head) {
+                            this.head = currentNode.next;
+                            this.head.prev = null;
+                        } else if (currentNode === this.tail) {
+                            this.tail = currentNode.prev;
+                            this.tail.next = null;
+                        } else {
+                            currentNode.prev.next = currentNode.next;
+                            currentNode.next.prev = currentNode.prev;
+                        }
+                        this.length--;
+                    }
+                    currentNode = currentNode.next;
+                }
+            }
+
+            find(data) {
+                let currentNode = this.head;
+                while (currentNode) {
+                    if (currentNode.data === data) {
+                        return currentNode;
+                    }
+                    currentNode = currentNode.next;
+                }
+                return null;
+            }
+
+            update(index, newData) {
+                if (index < 0 || index >= this.length) {
+                    return false;
+                }
+                let currentNode = this.head;
+                for (let i = 0; i < index; i++) {
+                    currentNode = currentNode.next;
+                }
+                currentNode.data = newData;
+                return true;
+            }
+
+            size() {
+                return this.length;
+            }
+        }
+
+        const linkedList = new DoublyLinkedList();
+
+        function appendNode() {
+            const data = document.getElementById('data').value;
+            linkedList.append(data);
+            displayListContents();
+        }
+
+        function prependNode() {
+            const data = document.getElementById('data').value;
+            linkedList.prepend(data);
+            displayListContents();
+        }
+
+        function removeNode() {
+            const data = document.getElementById('data').value;
+            linkedList.remove(data);
+            displayListContents();
+        }
+
+        function findNode() {
+            const data = document.getElementById('data').value;
+            const node = linkedList.find(data);
+            if (node) {
+                alert('Node found!');
+            } else {
+                alert('Node not found!');
+            }
+        }
+
+        function updateNode() {
+            const index = prompt('Enter the index of the node to update:');
+            const newData = prompt('Enter the new data:');
+            if (linkedList.update(index, newData)) {
+                alert('Node updated successfully!');
+                displayListContents();
+            } else {
+                alert('Invalid index!');
+            }
+        }
+
+        function getSize() {
+            alert('Size of the list: ' + linkedList.size());
+        }
+
+        function displayListContents() {
+            const listContents = document.getElementById('listContents');
+            listContents.innerHTML = '';
+            let currentNode = linkedList.head;
+            while (currentNode !== null) {
+                const listItem = document.createElement('li');
+                listItem.textContent = currentNode.data;
+                listContents.appendChild(listItem);
+                currentNode = currentNode.next;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Example</title>
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .node {
+            display: inline-block;
+            border: 1px solid black;
+            padding: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .sub-tree {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tree Example</h1>
+    <div>
+        <label for="insert">Insert Element:</label>
+        <input type="text" id="insert">
+        <button onclick="insert()">Insert</button>
+    </div>
+    <div>
+        <ul id="tree">
+        </ul>
+    </div>
+
+    <script>
+        class TreeNode {
+            constructor(value) {
+                this.value = value;
+                this.left = null;
+                this.right = null;
+            }
+        }
+
+        class BinaryTree {
+            constructor() {
+                this.root = null;
+            }
+
+            insert(value, parent) {
+                const newNode = new TreeNode(value);
+                if (!this.root) {
+                    this.root = newNode;
+                } else {
+                    if (!parent) {
+                        alert('Select a node to insert under.');
+                        return;
+                    }
+                    if (!parent.left) {
+                        parent.left = newNode;
+                    } else if (!parent.right) {
+                        parent.right = newNode;
+                    } else {
+                        alert('Node can have only two children.');
+                        return;
+                    }
+                }
+                this.display();
+            }
+
+            display() {
+                const treeContainer = document.getElementById('tree');
+                treeContainer.innerHTML = '';
+                if (this.root) {
+                    this.displayNode(this.root, treeContainer);
+                }
+            }
+
+            displayNode(node, container) {
+                const nodeElement = document.createElement('li');
+                nodeElement.classList.add('node');
+                nodeElement.textContent = node.value;
+                nodeElement.addEventListener('click', () => this.insert(prompt('Enter value:'), node));
+                container.appendChild(nodeElement);
+                if (node.left || node.right) {
+                    const subList = document.createElement('ul');
+                    subList.classList.add('sub-tree');
+                    if (node.left) {
+                        this.displayNode(node.left, subList);
+                    }
+                    if (node.right) {
+                        this.displayNode(node.right, subList);
+                    }
+                    nodeElement.appendChild(subList);
+                }
+            }
+        }
+
+        const tree = new BinaryTree();
+
+        function insert() {
+            const value = document.getElementById('insert').value;
+            if (value.trim() !== '') {
+                tree.insert(value.trim(), tree.root);
+                document.getElementById('insert').value = '';
+            }
+        }
+
+        // Инициализация дерева
+        tree.insert('Root', null);
+    </script>
+</body>
+</html>
